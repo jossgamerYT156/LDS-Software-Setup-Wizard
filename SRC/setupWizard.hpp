@@ -2,9 +2,11 @@
 #define SETUPWIZARD_HPP
 
 // Start Of: Static strings and values
-#define InstallerVersion        "Version 0.0.22"
+// Corporate told me to not hardcode these... i hardcoded them anyways. fight me >:3
+// - Lilly Aizawa @ LDS Softworks LLC
+#define InstallerVersion        "Version 0.0.23"
 
-#define ProgramWindowName             "Setup Wizard"
+#define ProgramWindowName       "Setup Wizard"
 
 // EULA Agreement message
 #define AcceptLicenseAgreement  "I accept the terms in the End User License Agreement"
@@ -19,7 +21,7 @@
 #define UIButton_Finalize       "Finish"
 #define UIButton_Cancel         "Cancel"
 
-// Embedded CSS for GTK to keep the Win95 Style... ish.
+// Embedded CSS for GTK to keep the Win-95 Style... -ish.
 const char win95_css[] =
             "* { "
             "  font-family: 'MS Sans Serif', 'Tahoma', sans-serif; "

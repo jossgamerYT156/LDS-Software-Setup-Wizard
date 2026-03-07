@@ -4,7 +4,7 @@
 A straightforward software installer (premade script) for Linux built with GTK++. This tool allows for quick deployment by configuring a simple text file and organizing your application binaries.
 
 ## Build Requirements:
-- Binutils Dependency
+- Binutils Dependency (Including the C++ compiler, g++ and its linker.)
 - Bash
 - GTKMM (GTK++)
 - pkgconfig
@@ -13,7 +13,7 @@ A straightforward software installer (premade script) for Linux built with GTK++
 ### Debian Build From Source Instructions
 - Open a command prompt
 - Navigate using CD to the project repository's directory
-- install the required dependencies by running `make init`
+- install the required dependencies by running `make init` (If not already installed)
 - run the `make setup` or `make all` command to build the output binary.
 > Note, this build process is generally fast, but it is recommended that the bash command is preceded by the `time` command if you want to know the exact build times.
 
@@ -40,10 +40,11 @@ The `setup.conf` file contains all the variables the Wizard needs to process the
 
 * **`DEFINSTTYPE`**: Defines the permission level.
     * `User`: Installs to a path relative to `$HOME`.
-    * `Global`: Installs to `/usr/bin`. This will trigger a request for ROOT/sudo access.
+    * `Global`: Installs to a path relative to `/`.
 * **`DEFINSTDIR`**: The default path suggested to the user (relative to `$HOME` in User mode).
 * **`MKDIR`**: Boolean. If `True`, the Wizard will create the directory specified in `INSTDIRNAME`.
 * **`INSTDIRNAME`**: The name of the directory to be created for your application files.
+* **`SKIPINTEGRITYCHECK`**: Skips the "The directory is not empty" dialog when installing to a non-empty directory, or a directory that already contains files (Perfect for Upgrade Packages). | Only from LDS Software Setup Wizard 0.0.23+
 
 ### Post-Installation
 
@@ -52,6 +53,7 @@ The `setup.conf` file contains all the variables the Wizard needs to process the
 * **`HASREADME`**: Set to `True` if your software includes a README file.
 * **`READMEFILE`**: The specific filename (e.g., `README.md`) to be opened if `HASREADME` is True.
 * **`SYMLINKFILES`**: If `True`, the installer attempts to symlink binaries to `/usr/bin` or `$HOME/System/Public/Programs`.
+   * *In Development Feature.*
 * **`ASKIFOPENONEND`**: If `True`, prompts the user to launch the software immediately after the setup finishes.
 
 ### Extra Software and Opt-In Features (Beta)
@@ -61,7 +63,7 @@ The `setup.conf` file contains all the variables the Wizard needs to process the
 
 * **`FEATURELISTFILE`**: This points to your features list file, which must include a list of the included extra features provided by your software (these are shown in the same order as in the file, so, keep it organized.)
 
->> For information about the FEATURELIST file syntax, please review the [Optional Features TOML Syntax](OPTIN/README.md) guide.
+>  For information about the FEATURELIST file syntax, please review the [Optional Features TOML-Like Syntax](OPTIN/README.md) guide.
 
 ## Directory Structure
 
@@ -71,6 +73,8 @@ The LDS-SSW expects the following layout:
 .
 ├── Binary/          # Your application files/binaries
 ├── Icons/           # Your application/setup icon
+├── OPTIN/           # Your optional features
+|    └──features.conf # Optional features list (see README.md in OPTIN directory)
 ├── setup.conf       # Your configuration file
 └── setup            # The installer executable
 ```
@@ -102,3 +106,38 @@ Regardless of which version you choose, the Setup Shield offers (mostly) the sam
 [Website Download (Just the Setup Shield and a basic config) ](https://softworks.aizawallc.org/LDS%20Software%20Setup%20Shield)
 
 [Github Download (Includes Source Code and build files)](https://github.com/jossgamerYT156/LDS-Software-Setup-Wizard/archive/refs/heads/main.zip)
+
+___
+#
+# Changeslog - 0.0.23
+- Added Skip Integrity flag (for upgrade packages)
+> The SKIPINTEGRITYCHECK flag will IGNORE all warnings on non-empty directories, and will write/overwrite already existing files if used without care.
+> Only recommended on upgrade-packaged software, or if you are an user setting this flag... don't. this flag will ignore ANY kind of security, and override your already existing files(so if this application has a binary that(for example) contains something that is named alike another already existing binary, it will replace it, thus probably breaking your system's software.)
+
+- Threaded File-Copy (from 0.0.23 and on, file copy happens on a threaded process, and only interacts with the UI thread when it is done.)
+
+- MB/GB/KB (We don't have PB, who distributes that much software in a single package tho?), we have now more sensitive File Size Meassurements, this is important for applications that offer BIG package size, such as Games or libraries.
+
+- Pre-run Root Check (for DEFINSTTYPE=Global)
+> This check will notify the user, that the software they're trying to install requires ROOT for installation as Global(all users, under /usr/bin), this check will ALSO tell the users to review the files before installing, as these kinds of installs will install as the root-user(GID_0), which could damage their machine if misused.
+
+- Added a few useful dialog boxes (for errors or notify user of actions.)
+- We still don't have a progress bar.
+> Progress bars on GTK++ are a hell to do.
+>> - Lilly Aizawa (Main developer of the LDS Software Setup Wizard Project)
+
+Setup Wizard's style remains the same, in honor of the good old days of Windows 95.
+
+___
+#
+## Legal reminder, and side notes
+
+> Legal reminder.
+>
+> This setup wizard does NOT intent do replace actually useful Setup Scripts(BASH) from other people, it is highly recommended that you install software from your distribution's package manager when available, it is also recommended, to only use this if you are targetting a non-tech-savvy user base(Such as new Linux Users, Mayor people(not all of them), who are just getting used to installing software), even though i higly recommend to install stuff from terminal, this graphical program can prove useful to SOME users.
+
+> As well, i am obligated to say, that the Windows trademark, is property of Microsoft, and any mention in here, is simply on comparison/giving you an idea, of how the LDS Software Setup Wizard looks/works.
+>
+> If you are looking for the official code for the Software Setup Wizard from Microsoft... why?... it is closed source, and the closest you can get to it, is by using [Nullsoft Scriptable Install System](https://sourceforge.net/projects/nsis) for Windows.
+>
+> At the moment(of writing this readme), there is not a "Official" Code-Base of the Win-NT Install Shield(as far as i know), available publicly.
