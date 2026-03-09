@@ -1,0 +1,7 @@
+*.dbg
+*.old
+SRC/*.s
+SRC/*.asm
+*Test*
+*TEST*
+*test*

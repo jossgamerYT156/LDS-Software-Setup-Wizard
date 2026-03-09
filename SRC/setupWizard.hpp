@@ -85,18 +85,19 @@ const char win95_css[] =
 
 
 // User Warning for Missing License, this is for security reasons, and to avoid users blaming ME for other Developers' bad usage of my software.
-static char ENOLICENSEADVISORY[] = "Software does not provide a license, proceed with care, as this "
+static char ENOLICENSEADVISORY[] = "\t\t\t\tWAIT!!\n\n"
+          "The software you're trying to install does not provide a license, proceed with care, as this "
           "Setup Program does not check for malicious behavior.\n\nPlease "
           "review the program's verity before installing.\n"
           "\nIf you wish to continue, it is important to note, that this setup "
           "utility(As well as LDS Softworks LLC) does not make themselves "
           "responsible for any damage caused, monetary losses, or other kind of "
-          "cyber-attack aftermath of installing untrustworthy software in your "
-          "PC, as this Setup Utility is given under the MIT License\n"
+          "cyber-attack aftermath of installing unverified software on your PC may cause.\n\n"
+          "As this Setup Utility is given under the MIT License and is provided AS IS without ANY WARRANTY of what it may be used for.\n"
           "\n---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n"
           "\n\tNote: Links included in this next section are NOT affiliated to "
-          "LDS or LDS Softworks LLC in any way, they simply serve as a "
-          "'Related Content' or 'Helpful Content'\n"
+          "LDS or LDS Softworks LLC in any way, they simply serve as a collection of "
+          "'Related Content' or 'Helpful Links'\n"
           "\n---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n"
           "\n\tYou can know more about the MIT License Agreement in here: "
           "https://en.wikipedia.org/wiki/MIT_License\n\n"
@@ -110,19 +111,20 @@ static char ENOLICENSEADVISORY[] = "Software does not provide a license, proceed
           "before installing it."
           "\nYou must accept this Agreement to continue with the installation "
           "UNDER YOUR OWN RISK AND KNOWLEDGE."
-          "\n\n\nIf you are a developer seeing this, A license file is highly "
-          "required when "
+          "\n\n\n\n\n"
+          "If you are a developer seeing this, A license file is highly required when "
           "approaching installation of software, this file ensures users don't "
           "illegally copy, distribute, sell or tamper with your program's "
           "files without you permissions, as well, it helps THE USER knows "
           "their Software Rights.\nThis is not obligatory to be a GPL or MIT "
-          "License Type, but can be any kind of license.\n\nThe purpose of "
-          "this, is to ensure that You(THE DEVELOPER) can trust on the END "
+          "License Type, but can be any kind of license, as long as it is explicit and detailed on its clausules."
+          "\n\nThe purpose of this, is to ensure that You(THE DEVELOPER) can trust on the END "
           "USER, by offering them an END-USER LICENSE AGREEMENT stating their "
           "rights and allowed actions against your software, as well as your "
           "responsibility as THE DEVELOPER, without one, it is highly possible "
           "WE(This Setup Utility), continues to mark your software as "
-          "UNTRUSTWORTHY.";
+          "UNTRUSTWORTHY.\n\n"
+          "Be a responsible developer, and please add the required LICENSE files, as this protects YOU and THE USER from any kind of miuse by third-parties.";
 
 // End Of: Static strings and values
 #endif

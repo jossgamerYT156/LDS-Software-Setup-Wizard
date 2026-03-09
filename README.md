@@ -109,7 +109,7 @@ Regardless of which version you choose, the Setup Shield offers (mostly) the sam
 
 ___
 #
-# Changeslog - 0.0.23
+# Changeslog - 0.0.23 - Patch1 Commit2 (P1C2)
 - Added Skip Integrity flag (for upgrade packages)
 > The SKIPINTEGRITYCHECK flag will IGNORE all warnings on non-empty directories, and will write/overwrite already existing files if used without care.
 > Only recommended on upgrade-packaged software, or if you are an user setting this flag... don't. this flag will ignore ANY kind of security, and override your already existing files(so if this application has a binary that(for example) contains something that is named alike another already existing binary, it will replace it, thus probably breaking your system's software.)
@@ -125,6 +125,9 @@ ___
 - We still don't have a progress bar.
 > Progress bars on GTK++ are a hell to do.
 >> - Lilly Aizawa (Main developer of the LDS Software Setup Wizard Project)
+
+- Added LICENSE Checks to ENFORCE EULA Trust
+>> You all need to BE RESPONSIBLE when deploying software, so, either you ship a license, or i tell users you might not be trustworthy.
 
 Setup Wizard's style remains the same, in honor of the good old days of Windows 95.
 

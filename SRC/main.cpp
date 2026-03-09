@@ -422,16 +422,51 @@ private:
     p1->set_border_width(15);
     auto scroller = Gtk::make_managed<Gtk::ScrolledWindow>();
     auto tv = Gtk::make_managed<Gtk::TextView>();
-    if (!fs::exists(config["LICENSEFILE"]) || config["LICENSEFILE"].empty() ||
-        !fs::exists("./LICENSE")) {
-      tv->get_buffer()->set_text(ENOLICENSEADVISORY);
-    } else {
-      std::ifstream lic(config["LICENSEFILE"]);
-      if (lic.is_open())
-        tv->get_buffer()->set_text(
-            std::string((std::istreambuf_iterator<char>(lic)),
-                        std::istreambuf_iterator<char>()));
+    // Don't be lazy. Add a license. BE RESPONSIBLE YE CUNT.
+    // - Lilly Aizawa @ LDS Softworks LLC
+
+    // This checks if there's a valid license file.
+    std::string finalLicenseText =
+        ""; // Default empty string, we check this later.
+    std::string licFile = config["LICENSEFILE"]; // Dev-Specified License File,
+                                                 // we check for its existence.
+    std::string pathToRead = "";                 // Constructor string.
+
+    // Here, we actually check for its existance, or if it is empty.
+    if (!licFile.empty() && fs::exists(licFile) && !fs::is_empty(licFile)) {
+      pathToRead = licFile; // And set it if not empty.
     }
+    // Instead here, we are using defaults, in case you forgot to mention your
+    // license file on the config, but does exist.
+    else if (fs::exists("./LICENSE") && !fs::is_empty("./LICENSE")) {
+      pathToRead = "./LICENSE"; // Default LICENSE, from GITHUB, almost always,
+                                // we use this as one of the defaults.
+    } else if (fs::exists("./COPYING") && !fs::is_empty("./COPYING")) {
+      pathToRead =
+          "./COPYING"; // This one is also very common, if you don't have ANY of
+                       // these two... the heck are you doing?
+      // WHY?. You're making software and deploying it, be responsible.
+    }
+
+    // We check if the path to read(file) is not empty.
+    if (!pathToRead.empty()) {
+      std::ifstream lic(pathToRead);
+      if (lic.is_open()) {
+        finalLicenseText = std::string(std::istreambuf_iterator<char>(lic),
+                                       std::istreambuf_iterator<char>());
+      }
+    }
+    // If all checks fail, we are telling on you... by telling the user to be
+    // careful with how they proceed.
+    if (finalLicenseText.empty()) {
+      tv->get_buffer()->set_text(ENOLICENSEADVISORY);
+    }
+    // Or put the license if it is valid.
+    else {
+      tv->get_buffer()->set_text(finalLicenseText);
+    }
+    // Hopefully, this encourages you to be legally compliant when distributing
+    // software. Be responsible.
     tv->set_editable(false);
     tv->set_wrap_mode(Gtk::WRAP_WORD);
     scroller->add(*tv);
