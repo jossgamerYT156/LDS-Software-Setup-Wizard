@@ -1,21 +1,41 @@
+## Global configuration
 COMPILER=g++
 INCLUDES=-ISRC/
+## Note, if you're on NixOS, you will have to change this manually, as of any attempt of automatizing this has resulted in a neverending headache.
+# In Response To: Woynert@NixOS - "Dependency Hell"
 PKG_CONFIG=`pkg-config gtkmm-3.0 --cflags --libs`
-SOURCES=SRC/main.cpp
-LIBS=$(PKG_CONFIG)
-FLAGS=-fpermissive
 STD=-std=c++17
+## This is the same everywhere else.
+SOURCES=SRC/main.cpp
+# we don't use the LIBS case anymore, we directly use PKG_CONFIG
+#LIBS=$(PKG_CONFIG)
+
+## Release specific flag and output, repetitive, but useful.
+FLAGS_REL=-fpermissive
 OUT=setup
 
-.PHONY: $(OUT) clean init run
+## Debug Specific flags and output
+FLAGS_DBG=-fpermissive -g -Wall -Wextra -Wpedantic -Werror
+OUT_DBG=setup.dbg
+
+.PHONY: $(OUT_DBG) $(OUT) release debug all clean init run
+
+$(OUT_DBG): $(SOURCES)
+	@clear
+	$(COMPILER) $(SOURCES) -o $(OUT_DBG) $(INCLUDES) $(PKG_CONFIG) $(FLAGS) $(FLAGS_DBG) $(STD)
 
 $(OUT): $(SOURCES)
-	@clear
-	$(COMPILER) $(SOURCES) -o $(OUT) $(INCLUDES) $(LIBS) $(FLAGS) $(STD)
+	$(COMPILER) $(SOURCES) -o $(OUT) $(INCLUDES) $(PKG_CONFIG) $(FLAGS) $(STD)
 
-all: $(OUT)
-	@echo "Targets will be built automatically."
+all: $(OUT_DBG) $(OUT)
+	@echo "Targets were be built automatically."
 
+release: $(OUT)
+	@echo "Target lacks Debug Symbols, you won't be able to fully debug this program after built task is completed."
+	@echo "For the debug target, use 'make all' or 'make debug'"
+
+debug: $(OUT_DBG)
+	@echo "Target is a debugging test. do not use this on production."
 clean:
 	rm $(OUT)
 

@@ -1,0 +1,4 @@
+setup.dbg
+*.old
+*.s
+*.asm

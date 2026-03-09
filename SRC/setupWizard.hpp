@@ -7,6 +7,8 @@
 #define InstallerVersion        "Version 0.0.23"
 
 #define ProgramWindowName       "Setup Wizard"
+// Weird markup issues forced me to hardcode this string.
+#define ProgramAboutWindowName  "About Software Setup Wizard©"
 
 // EULA Agreement message
 #define AcceptLicenseAgreement  "I accept the terms in the End User License Agreement"
@@ -80,6 +82,47 @@ const char win95_css[] =
             "  background-repeat: no-repeat; "
             "  background-position: center; "
             "}";
+
+
+// User Warning for Missing License, this is for security reasons, and to avoid users blaming ME for other Developers' bad usage of my software.
+static char ENOLICENSEADVISORY[] = "Software does not provide a license, proceed with care, as this "
+          "Setup Program does not check for malicious behavior.\n\nPlease "
+          "review the program's verity before installing.\n"
+          "\nIf you wish to continue, it is important to note, that this setup "
+          "utility(As well as LDS Softworks LLC) does not make themselves "
+          "responsible for any damage caused, monetary losses, or other kind of "
+          "cyber-attack aftermath of installing untrustworthy software in your "
+          "PC, as this Setup Utility is given under the MIT License\n"
+          "\n---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n"
+          "\n\tNote: Links included in this next section are NOT affiliated to "
+          "LDS or LDS Softworks LLC in any way, they simply serve as a "
+          "'Related Content' or 'Helpful Content'\n"
+          "\n---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n"
+          "\n\tYou can know more about the MIT License Agreement in here: "
+          "https://en.wikipedia.org/wiki/MIT_License\n\n"
+          "\tYou can also learn about 'LICENSES' in here: \n"
+          "\t(English Video by 'Sandip Das' on YouTube) "
+          "https://www.youtube.com/watch?v=Jj75JOiV9uA\n"
+          "\t(Video En Español por 'OpenWebinars' en YouTube) "
+          "https://www.youtube.com/watch?v=Sz07vfAlqYo\n"
+          "\n---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n"
+          "\n\nPlease ensure you TRUST the publisher of the provided software "
+          "before installing it."
+          "\nYou must accept this Agreement to continue with the installation "
+          "UNDER YOUR OWN RISK AND KNOWLEDGE."
+          "\n\n\nIf you are a developer seeing this, A license file is highly "
+          "required when "
+          "approaching installation of software, this file ensures users don't "
+          "illegally copy, distribute, sell or tamper with your program's "
+          "files without you permissions, as well, it helps THE USER knows "
+          "their Software Rights.\nThis is not obligatory to be a GPL or MIT "
+          "License Type, but can be any kind of license.\n\nThe purpose of "
+          "this, is to ensure that You(THE DEVELOPER) can trust on the END "
+          "USER, by offering them an END-USER LICENSE AGREEMENT stating their "
+          "rights and allowed actions against your software, as well as your "
+          "responsibility as THE DEVELOPER, without one, it is highly possible "
+          "WE(This Setup Utility), continues to mark your software as "
+          "UNTRUSTWORTHY.";
 
 // End Of: Static strings and values
 #endif

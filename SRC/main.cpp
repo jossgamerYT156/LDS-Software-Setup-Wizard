@@ -37,9 +37,11 @@ private:
 
 public:
   RetroInstaller()
-      : box_main(Gtk::ORIENTATION_VERTICAL, 0),
+      // Fixed weird nullptr issue from Woynert@NixOS - "NullPointer Exception
+      // after Installation Finishes".
+      : current_page(0), box_main(Gtk::ORIENTATION_VERTICAL, 0),
         box_bottom(Gtk::ORIENTATION_HORIZONTAL, 10),
-        box_buttons(Gtk::ORIENTATION_HORIZONTAL, 5), current_page(0) {
+        box_buttons(Gtk::ORIENTATION_HORIZONTAL, 5) {
     set_title(ProgramWindowName); // This is the title you see when you start
                                   // the application's setup.
     set_default_size(550, 420);   // You may change this if strictly necessary.
@@ -289,7 +291,10 @@ private:
   }
 
   void show_about_dialog() {
-    Gtk::Dialog about_dialog("About Software " + *ProgramWindowName, *this);
+    // Hardcoded string for the "About" window, made specifically to avoid weird
+    // formatting issues with GTKmm->Markdown
+    Gtk::Dialog about_dialog(ProgramAboutWindowName, *this);
+    // Else remains the same as of 0.0.22-23
     about_dialog.set_default_size(350, 200);
     auto content = about_dialog.get_content_area();
     content->set_spacing(15);
@@ -342,7 +347,8 @@ private:
     installDialog->set_message("Installation Complete!");
     installDialog->set_secondary_text(
         "You may now close this dialog and exit the installer.");
-    installDialog->signal_response().connect([this](int response) {
+    // Commented unused value.
+    installDialog->signal_response().connect([this](int /*response*/) {
       installDialog->hide();
       delete installDialog;
       installDialog = nullptr;
@@ -416,11 +422,16 @@ private:
     p1->set_border_width(15);
     auto scroller = Gtk::make_managed<Gtk::ScrolledWindow>();
     auto tv = Gtk::make_managed<Gtk::TextView>();
-    std::ifstream lic(config["LICENSEFILE"]);
-    if (lic.is_open())
-      tv->get_buffer()->set_text(
-          std::string((std::istreambuf_iterator<char>(lic)),
-                      std::istreambuf_iterator<char>()));
+    if (!fs::exists(config["LICENSEFILE"]) || config["LICENSEFILE"].empty() ||
+        !fs::exists("./LICENSE")) {
+      tv->get_buffer()->set_text(ENOLICENSEADVISORY);
+    } else {
+      std::ifstream lic(config["LICENSEFILE"]);
+      if (lic.is_open())
+        tv->get_buffer()->set_text(
+            std::string((std::istreambuf_iterator<char>(lic)),
+                        std::istreambuf_iterator<char>()));
+    }
     tv->set_editable(false);
     tv->set_wrap_mode(Gtk::WRAP_WORD);
     scroller->add(*tv);
@@ -514,12 +525,36 @@ private:
                        "Click Finish to exit the Setup Wizard."),
                    Gtk::PACK_SHRINK);
     chk_open_app =
-        Gtk::make_managed<Gtk::CheckButton>("Launch" + config["PROGNAME"]);
+        Gtk::make_managed<Gtk::CheckButton>("Launch " + config["PROGNAME"]);
     if (config["HASREADME"] == "True" && fs::exists(config["READMEFILE"])) {
       chk_read_me = Gtk::make_managed<Gtk::CheckButton>("Open Read Me");
+    } else {
+      // Fallback so the pointer isn't junk even if the file is missing
+      // FIX: __NULLPTR_EXCEPTION__ from Woynert@NixOS Bug Report: "Crashes
+      // after installation finishes with a Null-Pointer Exception"
+      chk_read_me = Gtk::make_managed<Gtk::CheckButton>(
+          "Open Read Me (Not Found)"); // Set the button's content regardless,
+                                       // but modify its contents to ensure we
+                                       // don't have NULL values.
+      chk_read_me->set_sensitive(
+          false); // Disable checking it, to avoid it being opened on end.
     }
+    // This check disables the main-binary button if it is not found on the
+    // Binary Directory, of course this makes no sense (that's why it is
+    // commented), but it helps to avoid tampered-setups, you may enable this if
+    // you wish to, but it is redundant, as the on_finish(); call has its own
+    // tamper-check on files.
+    // if (!fs::exists("Binary/" +
+    // config["MAINBINNAME"])) {
+    //   chk_open_app = Gtk::make_managed<Gtk::CheckButton>(
+    //       "Launch " + config["PROGNAME"] + " (Main Binary Not Found)");
+    //   chk_open_app->set_sensitive(false);
+    // }
+
     p5->pack_start(*chk_open_app, Gtk::PACK_SHRINK);
-    p5->pack_start(*chk_read_me, Gtk::PACK_SHRINK);
+    p5->pack_start(*chk_read_me,
+                   Gtk::PACK_SHRINK); // This now always points to something,
+                                      // even if no readme is available.
     notebook.append_page(*p5);
 
     // --- Bottom Layout ---
@@ -567,13 +602,16 @@ private:
         installDialog->set_deletable(false);
 
         std::thread([this, final_dest] {
-          copyApplicationFiles(final_dest, userDoesNotCare);
+          copyApplicationFiles(
+              final_dest); // Added a change page statement, this can be
+                           // redundant, but necessary in some contexts.
+          change_page(1);
           dispatcher.emit();
         }).detach();
-
       } else {
         change_page(1);
-        // I was fed up with notebook's stuff, so, we always update the resume data, regardless.
+        // I was fed up with notebook's stuff, so, we always update the resume
+        // data, regardless.
         update_resume_text(); // yes, this takes up CPU PP&S, sosumi.
       }
     });
@@ -604,29 +642,32 @@ private:
 
   // This, is to check if the install path is empty or not.
   bool check_directory_ui(fs::path pathToCheck) {
-    // Check if integrity check is even needed, if no? return true so we skip this check, if not...
+    // Check if integrity check is even needed, if no? return true so we skip
+    // this check, if not...
     if (config["SKIPINTEGRITYCHECK"] == "True")
       return true;
-      // check if the directory is empty, and return true if so.
+    // check if the directory is empty, and return true if so.
     if (!fs::exists(pathToCheck) || fs::is_empty(pathToCheck))
       return true;
 
     // if it isn't empty, ask the user if they are SURE they want to risk it.
-    Gtk::MessageDialog d(*this,
-                         "The selected installation directory is not empty!\n"
-                         "Files may be overwritten if you continue. Proceed anyway?",
-                         false, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_OK_CANCEL);
+    Gtk::MessageDialog d(
+        *this,
+        "The selected installation directory is not empty!\n"
+        "Files may be overwritten if you continue. Proceed anyway?",
+        false, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_OK_CANCEL);
 
     int result = d.run();
     return (result == Gtk::RESPONSE_OK); // And finally, return the result :3
   }
 
-
-  // I forgot if i had this on my last commit, but, this basically is the file copy thread.
-  // All this does, is copy stuff... and repeat a few checks for redundancy sake...
+  // I forgot if i had this on my last commit, but, this basically is the file
+  // copy thread. All this does, is copy stuff... and repeat a few checks for
+  // redundancy sake...
 
   // It may be a waste of CPU in a few cases, but, better safe than sorry.
-  int copyApplicationFiles(fs::path final_path, bool userDoesNotCareState) {
+  // Removed unused BOOLEAN value from function call.
+  int copyApplicationFiles(fs::path final_path) {
     try {
       fs::create_directories(final_path);
       if (fs::exists("Binary"))
@@ -637,7 +678,7 @@ private:
         fs::copy(config["READMEFILE"], final_path,
                  fs::copy_options::overwrite_existing);
 
-            // If we checked stuff from the features checker (in dev feature.)
+      // If we checked stuff from the features checker (in dev feature.)
       if (feature_model) {
         int idx = 0;
         for (auto row : feature_model->children()) {
@@ -681,7 +722,7 @@ private:
                            false, Gtk::MESSAGE_ERROR);
       d.run();
     }
-    change_page(1);
+    // change_page(1); // Wrong call location.
     return 0;
   }
 
@@ -699,7 +740,8 @@ private:
     fs::path absolute_install_path = fs::absolute(final_dest);
     if (chk_read_me->get_active()) {
       fs::path readme_path = absolute_install_path / config["READMEFILE"];
-      // This opens the readme file using xdg-open... might not work in all contexts if Wayland is involved.
+      // This opens the readme file using xdg-open... might not work in all
+      // contexts if Wayland is involved.
       system(("xdg-open \"" + readme_path.string() + "\" &").c_str());
     }
 
@@ -712,14 +754,37 @@ private:
 
       fs::path binary_path = absolute_install_path / bin_name;
 
-      // Execute using the full absolute path
-      std::string cmd = "\"" + binary_path.string() + "\" &";
-      system(cmd.c_str());
+      // If the binary is missing... we return a error message and exit with a
+      // exception. This is dumb and very badly formatted. But it works
+      // regardless.
+      if (!fs::exists(binary_path)) {
+        Gtk::MessageDialog d(
+            *this,
+            "Error: Binary does not exist on install directory, was it on the "
+            "'Binary' directory relative to setup's executable?\n\nThis might "
+            "be caused by a missing file inside the 'Binary' directory on the "
+            "setup-program's root directory.\n\n"
+            "If you think this is a mistake, we recommend you to re-run this "
+            "setup utility, or to manually copy the file referenced by "
+            "MAINBINNAME inside the setup.conf file.\n\nOur Most Sincerest "
+            "Apologies For The Inconvenience",
+            false, Gtk::MESSAGE_ERROR);
+        d.run();
+        // Exit with error, because if we can't find the binary, we cannot
+        // launch the application.
+        exit(1);
+      } else {
+        // If file does indeed exists, execute it.
+        // Execute using the full absolute path
+        std::string cmd = "\"" + binary_path.string() + "\" &";
+        system(cmd.c_str());
+      }
     }
     close();
   }
 };
 
+// Main Function Entry Point
 int main(int argc, char *argv[]) {
   auto app =
       Gtk::Application::create(argc, argv, "com.lds_softworks.setup_wizard");
